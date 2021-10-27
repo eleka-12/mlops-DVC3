@@ -1,0 +1,25 @@
+name: farmers
+on: [push]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: iterative/setup-cml@v1
+      - name: Train model
+
+      - name: Write CML report
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Your ML workflow goes here
+          pip install -r requirements.txt
+          dvc repro
+
+          git feth --prune
+          dvc metrics diff --show-md master > report.md
+
+          # Add figure to the report
+          echo "## Validating results by region"
+          cml-publish by_region.png --md >> report.md
+          cml-send-comment report.md
